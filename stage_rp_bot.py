@@ -5,8 +5,30 @@ import json
 import os
 import asyncio
 from datetime import datetime, timezone, timedelta
+from flask import Flask
+from threading import Thread
 
 TOKEN = os.getenv("DISCORD_TOKEN", "")
+
+# ========== KEEP ALIVE FOR RENDER FREE WEB SERVICE ==========
+app_web = Flask(__name__)
+
+@app_web.route('/')
+def home():
+    return "Stage Role Play Bot is alive! ✅ | /health for check"
+
+@app_web.route('/health')
+def health():
+    return "OK", 200
+
+def run_web():
+    port = int(os.environ.get("PORT", 10000))
+    app_web.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run_web)
+    t.daemon = True
+    t.start()
 
 # ========== НАСТРОЙКИ STAGE ROLE PLAY ==========
 # Вставь ID ролей! Включи режим разработчика -> ПКМ на роль -> Копировать ID
@@ -440,4 +462,5 @@ async def on_ready():
     except Exception as e:
         print(e)
 
+keep_alive()
 bot.run(TOKEN)
